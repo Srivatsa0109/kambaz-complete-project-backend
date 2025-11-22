@@ -3,13 +3,13 @@ import cors from "cors";
 import session from "express-session";
 import dotenv from "dotenv/config";
 import hello from "./hello.js";
-import lab5 from './kambaz-next-js/src/app/Labs/lab5/index.js';
-import db from "./kambaz-next-js/Kambaz/Database/index.js"; 
-import CoursesRoutes from "./kambaz-next-js/Kambaz/Courses/routes.js";
-import ModulesRoutes from "./kambaz-next-js/Kambaz/Modules/routes.js";
-import UserRoutes from "./kambaz-next-js/Kambaz/Users/routes.js";
-import AssignmentsRoutes from "./kambaz-next-js/Kambaz/Assignments/routes.js";
-import EnrollmentsRoutes from "./kambaz-next-js/Kambaz/Enrollments/routes.js";
+import lab5 from './Labs/lab5/index.js';                   
+import db from "./Kambaz/Database/index.js";               
+import CoursesRoutes from "./Kambaz/Courses/routes.js";    
+import ModulesRoutes from "./Kambaz/Modules/routes.js";    
+import UserRoutes from "./Kambaz/Users/routes.js";         
+import AssignmentsRoutes from "./Kambaz/Assignments/routes.js";
+import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
 const app = express();
 
@@ -31,7 +31,7 @@ const sessionOptions = {
     saveUninitialized: false,
 };
 
-if (process.env.SERVER_ENV !== "development") {
+if (process.env.NODE_ENV === "production") {  
     sessionOptions.proxy = true;
     sessionOptions.cookie = {
         sameSite: "none",
@@ -46,12 +46,14 @@ app.use(express.json());
 UserRoutes(app, db);
 hello(app);
 lab5(app);
-CoursesRoutes(app,db);
-ModulesRoutes(app,db);
-AssignmentsRoutes(app,db);
-EnrollmentsRoutes(app,db);
+CoursesRoutes(app, db);
+ModulesRoutes(app, db);
+AssignmentsRoutes(app, db);
+EnrollmentsRoutes(app, db);
 
 app.listen(process.env.PORT || 4000, () => {
-    console.log(`Server running on port ${process.env.PORT || 4000}`);
+    console.log(`Server running on port ${process.env.PORT || 4000} in ${process.env.NODE_ENV || 'development'} mode`);
+    console.log(`Accepting requests from: ${process.env.CLIENT_URL || 'http://localhost:3000'}`);
 });
+
 export default app;
