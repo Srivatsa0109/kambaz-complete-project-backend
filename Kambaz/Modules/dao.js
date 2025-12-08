@@ -1,12 +1,9 @@
 import ModuleModel from "./model.js";
-import { v4 as uuidv4 } from 'uuid'; // You might need to install: npm install uuid
+import { v4 as uuidv4 } from 'uuid'; 
 
 export async function createModule(module) {
-  // Don't delete _id, but generate one if it doesn't exist
   if (!module._id) {
-    // Generate a short ID similar to your existing pattern (M101, M102, etc.)
-    // Or use a UUID for uniqueness
-    const randomId = `M${Date.now().toString().slice(-6)}`; // Generates IDs like M123456
+    const randomId = `M${Date.now().toString().slice(-6)}`; 
     module._id = randomId;
   }
   
@@ -19,7 +16,6 @@ export function findModulesForCourse(courseId) {
 }
 
 export function deleteModule(moduleId) {
-  // Try to delete by _id first, if that fails try by name
   return ModuleModel.deleteOne({ 
     $or: [
       { _id: moduleId },
@@ -29,7 +25,6 @@ export function deleteModule(moduleId) {
 }
 
 export async function updateModule(moduleId, moduleUpdates) {
-  // Try to find by _id first, if that fails try by name
   const updated = await ModuleModel.findOneAndUpdate(
     { 
       $or: [
@@ -45,7 +40,6 @@ export async function updateModule(moduleId, moduleUpdates) {
 }
 
 export function findModuleById(moduleId) {
-  // Try to find by _id first, if that fails try by name
   return ModuleModel.findOne({
     $or: [
       { _id: moduleId },

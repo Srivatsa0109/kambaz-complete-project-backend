@@ -30,13 +30,6 @@ export default function UsersDao() {
     });
   };
 
-  const findEnrollmentsForUser = async (userId) => {
-        console.log("DAO: Finding enrollments for user:", userId);
-        const enrollments = await model.find({ user: String(userId) });
-        console.log("DAO: Found", enrollments.length, "enrollments:", enrollments);
-        return enrollments;
-    };
-
   const updateUser = (userId, user) =>
     UserModel.updateOne({ _id: userId }, { $set: user });
 

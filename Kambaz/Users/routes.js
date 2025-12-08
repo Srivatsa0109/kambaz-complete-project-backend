@@ -254,11 +254,20 @@ export default function UserRoutes(app) {
     }
   });
 
+  const getCurrentUser = (req, res) => {
+  const currentUser = req.session["currentUser"];
+  if (!currentUser) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  res.json(currentUser);
+};
+
   app.get("/api/users/migrate", migrate);
   app.post("/api/users/signup", signup);
   app.post("/api/users/signin", signin);
   app.post("/api/users/signout", signout);
   app.get("/api/users/profile", profile);
+  app.get("/api/users/current", getCurrentUser); 
   app.get("/api/users/current/courses", findMyCourses);
   app.post("/api/users", createUser);
   app.get("/api/users", findAllUsers);
