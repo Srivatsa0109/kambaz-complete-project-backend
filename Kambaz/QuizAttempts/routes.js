@@ -54,39 +54,59 @@ export default function QuizAttemptRoutes(app) {
       const gradedAnswers = [];
       
       for (const answer of answers) {
-        const question = quiz.questions.id(answer.questionId);
-        if (!question) continue;
+  const question = quiz.questions.id(answer.questionId);
+  if (!question) continue;
+  
+  let isCorrect = false;
+  let pointsEarned = 0;
+  
+  if (question.type === 'multiple-choice') {
+    const correctChoice = question.choices.find(c => c.isCorrect);
+    isCorrect = correctChoice && correctChoice._id.toString() === answer.answer;
+  } else if (question.type === 'true-false') {
+    isCorrect = question.correctAnswer === answer.answer;
+  } else if (question.type === 'fill-in-blank') {
+    // Handle both single answer (string) and multiple answers (array)
+    const studentAnswers = Array.isArray(answer.answer) 
+      ? answer.answer 
+      : [answer.answer];
+    
+    const possibleAnswers = question.possibleAnswers || [];
+    
+    // Check if all blanks are filled correctly
+    if (studentAnswers.length === possibleAnswers.length) {
+      isCorrect = studentAnswers.every((studentAns, index) => {
+        if (!possibleAnswers[index]) return false;
         
-        let isCorrect = false;
-        let pointsEarned = 0;
+        // Apply case sensitivity
+        const studentAnswer = question.caseSensitive 
+          ? studentAns.trim()
+          : studentAns.trim().toLowerCase();
         
-        if (question.type === 'multiple-choice') {
-          const correctChoice = question.choices.find(c => c.isCorrect);
-          isCorrect = correctChoice && correctChoice._id.toString() === answer.answer;
-        } else if (question.type === 'true-false') {
-          isCorrect = question.correctAnswer === answer.answer;
-        } else if (question.type === 'fill-in-blank') {
-          const studentAnswer = question.caseSensitive 
-            ? answer.answer 
-            : answer.answer.toLowerCase();
-          isCorrect = question.possibleAnswers.some(pa => {
-            const possibleAnswer = question.caseSensitive ? pa : pa.toLowerCase();
-            return possibleAnswer === studentAnswer;
-          });
-        }
+        const correctAnswer = question.caseSensitive 
+          ? possibleAnswers[index].trim()
+          : possibleAnswers[index].trim().toLowerCase();
         
-        if (isCorrect) {
-          pointsEarned = question.points;
-          score += pointsEarned;
-        }
-        
-        gradedAnswers.push({
-          questionId: answer.questionId,
-          answer: answer.answer,
-          isCorrect,
-          pointsEarned
-        });
-      }
+        return studentAnswer === correctAnswer;
+      });
+    } else {
+      // Wrong number of answers provided
+      isCorrect = false;
+    }
+  }
+  
+  if (isCorrect) {
+    pointsEarned = question.points;
+    score += pointsEarned;
+  }
+  
+  gradedAnswers.push({
+    questionId: answer.questionId,
+    answer: answer.answer,
+    isCorrect,
+    pointsEarned
+  });
+}
       
       const attempt = await attemptDao.createAttempt({
         quiz: req.params.quizId,
